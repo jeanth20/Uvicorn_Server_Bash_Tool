@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Activate the virtual environment
+source env/bin/activate
+
+    # Run uvicorn using nohup
+    # nohup uvicorn app.start:app --reload --host 0.0.0.0 --port 8000 &
+
+if [ "$1" = "1" ]; then
+    echo "Executing script [1]"
+    echo "Starting Server --reload"
+    uvicorn app.start:app --reload
+
+elif [ "$1" = "2" ]; then
+    echo "Executing script [2]"
+    echo "Starting Server --reload --nohup"
+    nohup uvicorn app.start:app --reload
+
+elif [ "$1" = "3" ]; then
+    echo "Executing script [3]"
+    echo "Starting Server --reload --nohup --background"
+    nohup uvicorn app.start:app --reload &
+    
+elif [ "$1" = "4" ]; then
+    echo "Executing script [4]"
+    echo "Starting Server --reload --nohup --host --port --background"
+    nohup uvicorn app.start:app --reload --host 0.0.0.0 --port 8000 &
+
+elif [ "$1" = "k" ]; then
+    echo "Executing script [kill]"
+    echo "Kill Server, Linked and Zombie Processes"
+
+    # Kill all processes linked to UVicorn server
+    killall uvicorn
+
+    # Kill all FastAPI processes
+    for pid in $(pgrep -f 'fastapi'); do
+        kill "$pid"
+    done
+
+    # Kill any zombie processes
+    for pid in $(ps -A -ostat,ppid | grep -e '^[Zz]' | awk '{print $2}'); do
+        kill "$pid"
+    done
+
+else
+    echo "Invalid argument. Usage: $0 {1|2|3|4}"
+    exit 1
+fi
